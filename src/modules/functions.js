@@ -1,4 +1,5 @@
-export default function createMarkup(imgArr) {
+import { refs } from "./data.js";
+export function createMarkup(imgArr) {
   
   imgArr.forEach(el => {
       refs.galleryEl.insertAdjacentHTML(
