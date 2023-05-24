@@ -1,0 +1,41 @@
+
+
+.search-form {
+  padding-left: 26px;
+}
+
+.load-more {
+  visibility: hidden;
+  margin-left: 250px;
+  width: 150px;
+  height: 25px;
+  background-color: rgb(3, 184, 184);
+  font-size: 18px;
+  border: 1px solid rgb(4, 113, 113);
+  border-radius: 12px;
+  transition: box-shadow .3s;
+
+}
+
+.load-more:hover {
+  box-shadow:0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+
+}
+
+.main-title {
+margin-left: 26px;
+margin-top: 0;
+}
+
+.photo-card {
+  margin-left: 26px;
+  padding-bottom: 26px;
+}
+
+.info-item {
+  color:rgb(48, 43, 33);
+  line-height: 2;
+  margin-top: 0;
+  margin-bottom: 0;
+
+}
