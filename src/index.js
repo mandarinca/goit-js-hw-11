@@ -1,38 +1,85 @@
 import Notiflix from 'notiflix';
-const axios = require('axios').default;
+import axios from 'axios';
+import SimpleLightbox from "simplelightbox";
+import 'simplelightbox/dist/simple-lightbox.min.css';
+import { refs } from './modules/data.js';
+//import {createMarkup} from './modules/functions.js'
 
 
-const pixabayKey = '36594105-8544a69bb4c5d0c0362bb11bf';
-const formEl = document.querySelector('.search-form');
-const galleryEl = document.querySelector('.gallery');
-const moreBtnEl = document.querySelector('.load-more');
-const PER_PAGE = 4;
+// const pixabayKey = '36594105-8544a69bb4c5d0c0362bb11bf';
+// const formEl = document.querySelector('.search-form');
+// const galleryEl = document.querySelector('.gallery');
+// //const moreBtnEl = document.querySelector('.load-more');
+// const PER_PAGE = 4;
+// let pageParams = 1;
+// let isCanLoad = false;
+
+// let searchVal;
+
+// const lightbox = new SimpleLightbox('.gallery a');
+
 let pageParams = 1;
+let isCanLoad = false;
 let searchVal;
 
-formEl.addEventListener('submit', function (event) {
+
+function createMarkup(imgArr) {
+  
+  imgArr.forEach(el => {
+      refs.galleryEl.insertAdjacentHTML(
+
+          'beforeEnd',
+          `<div class="photo-card">
+
+          <a class="photo" href="${el.webformatURL}">
+          <img src="${el.webformatURL}" alt="${el.tags}" loading="lazy" width='480' height='320'/>
+          </a>
+
+          <div class="info">
+            <p class="info-item">
+              <b>Likes: ${el.likes}</b>
+            </p>
+            <p class="info-item">
+              <b>Views: ${el.views}</b>
+            </p>
+            <p class="info-item">
+              <b>Comments: ${el.comments}</b>
+            </p>
+            <p class="info-item">
+              <b>Downloads: ${el.downloads}</b>
+            </p>
+          </div>
+        </div>`
+      );
+    });
+}
+
+refs.formEl.addEventListener('submit', function (event) {
+  
     event.preventDefault();
-    galleryEl.innerHTML = '';
-    moreBtnEl.style.visibility = 'hidden';
+
+    refs.galleryEl.innerHTML = '';
+    //moreBtnEl.style.visibility = 'hidden';
     
     searchVal = event.target.searchQuery.value;
-    //console.log('lol',event.target.searchQuery.value);
 
     if (searchVal == "") {
         Notiflix.Report.warning("ACHTUNG!!!",'Imput can not be empty!!!');
         return 
     }
-    
+
+    pageParams = 1;
+
     axios({
         method: 'get',
         url: 'https://pixabay.com/api/',
         params: {
-            key: pixabayKey,
+            key: refs.pixabayKey,
             q: searchVal,
             image_type: 'photo',
             orientation: 'horizontal',
             safesearch: true,
-            per_page: PER_PAGE,
+            per_page: refs.PER_PAGE,
             page: pageParams
         },   
     })
@@ -43,36 +90,17 @@ formEl.addEventListener('submit', function (event) {
                 return false
             }
             console.log('lol1',response.data.hits);
+            console.log('lol1',response);
             
-            response.data.hits.forEach(el => {
-                galleryEl.insertAdjacentHTML(
-
-                    'beforeEnd',
-                    `<div class="photo-card">
-                    <img src="${el.webformatURL}" alt="${el.tags}" loading="lazy" />
-                    <div class="info">
-                      <p class="info-item">
-                        <b>Likes: ${el.likes}</b>
-                      </p>
-                      <p class="info-item">
-                        <b>Views: ${el.views}</b>
-                      </p>
-                      <p class="info-item">
-                        <b>Comments: ${el.comments}</b>
-                      </p>
-                      <p class="info-item">
-                        <b>Downloads: ${el.downloads}</b>
-                      </p>
-                    </div>
-                  </div>`
-
-                );
-            });
-            if (response.data.totalHits > PER_PAGE) { 
-                moreBtnEl.style.visibility = 'visible';
-            }
-
             
+            isCanLoad = response.data.totalHits > refs.PER_PAGE ? true : false;
+            
+            
+            createMarkup(response.data.hits);
+            
+            refs.lightbox.refresh(); // Next Image
+
+            console.log(refs.PER_PAGE);
             console.log(response.data.hits.length);
             console.log(response.data.totalHits);
         })
@@ -80,86 +108,65 @@ formEl.addEventListener('submit', function (event) {
             // handle error
             console.log(error);
         })
+    });
+        // window.addEventListener('scroll', function() {
+        //   document.getElementById('showScroll').innerHTML = window.pageYOffset + 'px';
+        // });
+
+window.addEventListener('scroll', function () {
+  //console.log('scroll1 window.innerHeight, window.pageYOffset, document.body.offsetHeight', window.innerHeight, window.pageYOffset, document.body.offsetHeight);
+ 
+  if((document.body.offsetHeight-window.innerHeight) <= window.pageYOffset && isCanLoad == true){
+    loadMoreImgs();
+  }
 })
 
-
-moreBtnEl.addEventListener('click', function (event) {
-
-
-
-    axios({
-        method: 'get',
-        url: 'https://pixabay.com/api/',
-        params: {
-            key: pixabayKey,
-            q: searchVal,
-            image_type: 'photo',
-            orientation: 'horizontal',
-            safesearch: true,
-            per_page: PER_PAGE,
-            page: pageParams
-        },   
-    })
-
+function loadMoreImgs() {
     
-    .then(function (response) {
-        
-        response.data.hits.forEach(el => {
-            galleryEl.insertAdjacentHTML(
+  pageParams += 1;
 
-                'beforeEnd',
-                `<div class="photo-card">
-                <img src="${el.webformatURL}" alt="${el.tags}" loading="lazy" />
-                <div class="info">
-                  <p class="info-item">
-                    <b>Likes: ${el.likes}</b>
-                  </p>
-                  <p class="info-item">
-                    <b>Views: ${el.views}</b>
-                  </p>
-                  <p class="info-item">
-                    <b>Comments: ${el.comments}</b>
-                  </p>
-                  <p class="info-item">
-                    <b>Downloads: ${el.downloads}</b>
-                  </p>
-                </div>
-              </div>`
+  axios({
+      method: 'get',
+      url: 'https://pixabay.com/api/',
+      params: {
+          key: refs.pixabayKey,
+          q: searchVal,
+          image_type: 'photo',
+          orientation: 'horizontal',
+          safesearch: true,
+          per_page: refs.PER_PAGE,
+          page: pageParams
+      }  
+  })
+  .then(function (response) {
+      
+    createMarkup(response.data.hits);
+       
+        refs.lightbox.refresh(); // Next Image
+       
 
-            );
-        });
+      if ( pageParams == Math.ceil(response.data.totalHits / refs.PER_PAGE) ) { 
 
-        if ( pageParams == Math.ceil(response.data.totalHits / PER_PAGE) ) { 
-            moreBtnEl.style.visibility = 'hidden';
-        }
-        console.log('Im  on page#: ', pageParams);
-    })
-    .catch(function (error) {
-        console.log(error);
-    })
-})
+          //moreBtnEl.style.visibility = 'hidden';
 
-// import SimpleLightbox from 'simplelightbox';
-// import 'simplelightbox/dist/simple-lightbox.min.css';
-// // Change code below this line
+          Notiflix.Report.info("We're sorry, but you've reached the end of search results.");
+      }
+  })
+  
+  .catch(function (error) {
+      console.log(error);
+  })
+}
 
-// galleryItems.forEach(el => {
-// ulEl.insertAdjacentHTML(
-//     'beforeEnd',
-//     `<li class="gallery__item">
-//         <a class="gallery__link" href="${el.original}">
-//         <img
-//             class="gallery__image"
-//             src="${el.preview}"
-//             alt="${el.description}"
-            
-//         />
-//         </a>
-//     </li>`
-// );
-// });
 
-// const lightbox = new SimpleLightbox('.gallery a', {
-// captionsData: 'alt',
-// captionDelay: 250,
-// });
+/* function test() {
+  const { height: cardHeight } = document
+    .querySelector(".gallery")
+    .firstElementChild.getBoundingClientRect();
+
+  window.scrollBy({
+    top: cardHeight * 1.3,
+    behavior: "smooth",
+  });
+  //console.log('call test', document.querySelector(".gallery").firstElementChild.getBoundingClientRect());
+} */
