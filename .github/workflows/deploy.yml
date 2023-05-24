@@ -13,7 +13,7 @@ jobs:
 
       - name: Install and Build 🔧
         run: |
-          using: 'node16'
+        
           npm ci
           npm run build
 
